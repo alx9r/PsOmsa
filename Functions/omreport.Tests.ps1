@@ -66,7 +66,19 @@ Describe ConvertFrom-OmreportStream {
         $r.Objects[0].b | Should be 2
         $r.Objects[1].a | Should be 3
         $r.Objects[1].b | Should be 4
+    }
+    It 'accepts pipeline input' {
+        $r = @(
+            'a;b'
+            '1;2'
+            '3;4'
+        ) | ConvertFrom-OmreportStream
 
+        $r.Objects.Count | Should be 2
+        $r.Objects[0].a | Should be 1
+        $r.Objects[0].b | Should be 2
+        $r.Objects[1].a | Should be 3
+        $r.Objects[1].b | Should be 4
     }
 }
 }

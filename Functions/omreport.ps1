@@ -28,7 +28,9 @@ The code above outputs the physical ID and capacity of hard drives that are dedi
     (
         # The stream object output by omreport when invoked from PowerShell.
         [parameter(Mandatory = $true,
-                   Position = 1)]
+                   Position = 1,
+                   ValueFromPipeline=$true,
+                   ValueFromPipelineByPropertyname=$true)]
         [object[]]
         $OmreportStream,
 
@@ -36,11 +38,22 @@ The code above outputs the physical ID and capacity of hard drives that are dedi
         [string]
         $Delimiter = ';'
     )
+    begin
+    {
+        $accumulator = [System.Collections.ArrayList]@()
+    }
     process
+    {
+        $OmreportStream |
+            % {
+                $accumulator.Add($_) | Out-Null
+            }
+    }
+    end
     {
         $h = @{}
         $h.Delimiter = $delimiter
-        $h.DelimitedLines = $OmreportStream | ? { $_ -match $delimiter }
+        $h.DelimitedLines = $accumulator | ? { $_ -match $delimiter }
 
         if ($h.DelimitedLines.Count -lt 2)
         {
@@ -50,7 +63,7 @@ The code above outputs the physical ID and capacity of hard drives that are dedi
             )
         }
 
-        $h.UndelimitedLines = $OmreportStream | ? { $_ -notmatch $delimiter }
+        $h.UndelimitedLines = $accumulator | ? { $_ -notmatch $delimiter }
 
         $h.HeadingsLine = $h.DelimitedLines | Select -First 1
         $h.Headings = $h.HeadingsLine.Split($delimiter)
