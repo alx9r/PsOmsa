@@ -13,7 +13,7 @@ Parsing of the output of `omreport` is implemented.  Piping the output of `omrep
 
 # How do I use this module? 
 
-First take a look at the stream of character output by `omreport` in your environment.  In my environment, the following command is interesting because it show information about the 14 physical disks attached to a PERC 710P:
+First take a look at the stream of character output by `omreport` in your environment.  In my environment, the following command is interesting because it shows information about the 14 physical disks attached to a PERC 710P:
 
 ````Shell
 omreport storage pdisk controller=0 
