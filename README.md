@@ -1,4 +1,4 @@
-[![Build status](https://ci.appveyor.com/api/projects/status/r8mqw7hg1rri1imn/branch/master?svg=true&passingText=master%20-%20OK)](https://ci.appveyor.com/project/alx9r/toolfoundations/branch/master)
+[![Build status](https://ci.appveyor.com/api/projects/status/r8mqw7hg1rri1imn/branch/master?svg=true&passingText=master%20-%20OK)](https://ci.appveyor.com/project/alx9r/PsOmsa/branch/master)
 
 ## PowerShell Module for Dell OMSA
 PowerShell bindings for the Dell Open Management Server Administration command line interface.
