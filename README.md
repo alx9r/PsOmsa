@@ -1,17 +1,17 @@
 [![Build status](https://ci.appveyor.com/api/projects/status/r8mqw7hg1rri1imn/branch/master?svg=true&passingText=master%20-%20OK)](https://ci.appveyor.com/project/alx9r/toolfoundations/branch/master)
 
-# PowerShell Module for Dell OMSA
+## PowerShell Module for Dell OMSA
 PowerShell bindings for the Dell Open Management Server Administration command line interface.
 
-# Why does this exist?
+### Why does this exist?
 
 This module exists because the only Dell-supported scriptable API to the PERC family of controllers seems to be the OMSA CLI commands `omreport` and `omconfig`.  The input and output to those commands is character strings.  Appropriately converting to and from those character strings is an arcane task.  This module exists to provide a single location where the arcane conversions are implemented.
 
-# What is implemented?
+### What is implemented?
 
 Parsing of the output of `omreport` is implemented.  Piping the output of `omreport` to `ConvertFrom-OmreportStream` produces a stream of sensible powershell objects.
 
-# How do I use this module? 
+### How do I use this module? 
 
 First take a look at the stream of character output by `omreport` in your environment.  In my environment, the following command is interesting because it shows information about the 14 physical disks attached to a PERC 710P:
 
