@@ -25,7 +25,7 @@ Describe ConvertFrom-OmreportStream {
             'a;b'
             '1;2'
         )
-        $r = ConvertFrom-OmreportStream $s
+        $r = ConvertFrom-OmreportStream $s -ParentData
 
         $r.UndelimitedLines.Count | Should be 2
         $r.UndelimitedLines[0] | Should be 'undelimited line'
@@ -36,7 +36,7 @@ Describe ConvertFrom-OmreportStream {
             'a;b'
             '1;2'
         )
-        $r = ConvertFrom-OmreportStream $s
+        $r = ConvertFrom-OmreportStream $s -ParentData
 
         $r.DelimitedLines.Count | Should be 2
         $r.DelimitedLines[0] | Should be 'a;b'
@@ -47,7 +47,7 @@ Describe ConvertFrom-OmreportStream {
             'a;b'
             '1;2'
         )
-        $r = ConvertFrom-OmreportStream $s
+        $r = ConvertFrom-OmreportStream $s -ParentData
 
         $r.Headings.Count | Should be 2
         $r.Headings[0] | Should be 'a'
@@ -59,14 +59,39 @@ Describe ConvertFrom-OmreportStream {
             '1;2'
             '3;4'
         )
-        $r = ConvertFrom-OmreportStream $s
+        $r = ConvertFrom-OmreportStream $s -ParentData
 
         $r.Objects.Count | Should be 2
         $r.Objects[0].a | Should be 1
         $r.Objects[0].b | Should be 2
         $r.Objects[1].a | Should be 3
         $r.Objects[1].b | Should be 4
+    }
+    It 'accepts pipeline input' {
+        $r = @(
+            'a;b'
+            '1;2'
+            '3;4'
+        ) | ConvertFrom-OmreportStream -ParentData
 
+        $r.Objects.Count | Should be 2
+        $r.Objects[0].a | Should be 1
+        $r.Objects[0].b | Should be 2
+        $r.Objects[1].a | Should be 3
+        $r.Objects[1].b | Should be 4
+    }
+    It 'just produces objects by default' {
+        $r = @(
+            'a;b'
+            '1;2'
+            '3;4'
+        ) | ConvertFrom-OmreportStream
+
+        $r.Count | Should be 2
+        $r[0].a | Should be 1
+        $r[0].b | Should be 2
+        $r[1].a | Should be 3
+        $r[1].b | Should be 4
     }
 }
 }
