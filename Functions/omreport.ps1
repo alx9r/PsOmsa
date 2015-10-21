@@ -126,3 +126,162 @@ The code above outputs the physical ID and capacity of hard drives that are dedi
         return [pscustomobject]$h.Objects
     }
 }
+function ConvertFrom-OmreportSystemVersion
+{
+    [CmdletBinding()]
+    [OutputType([pscustomobject])]
+    param
+    (
+        # The stream object output by omreport when invoked from PowerShell.
+        [parameter(Mandatory = $true,
+                   Position = 1,
+                   ValueFromPipeline=$true,
+                   ValueFromPipelineByPropertyname=$true)]
+        [object[]]
+        $OmreportStream,
+
+        # The character(s) used to delimit the fields in the omreport character stream.
+        [string]
+        $Delimiter = ';'
+    )
+    begin
+    {
+        $accumulator = [System.Collections.ArrayList]@()
+    }
+    process
+    {
+        $OmreportStream |
+            % {
+                $accumulator.Add($_) | Out-Null
+            }
+    }
+    end
+    {
+        if ( $accumulator[0] -ne 'Version Report')
+        {
+            throw New-Object System.ArgumentException(
+                'OmreportStream does not begin with "Version Report".',
+                'OmreportStream'
+            )
+        }
+
+        $h = @{}
+        $h.Title = $accumulator[0]
+
+        $h.Sections = @{}
+        $i = 0
+        $sectionIndex = 0
+
+        foreach ( $line in $accumulator )
+        {
+            $lineType = ''
+            if
+            (
+                $line -and
+                $line -notmatch $Delimiter
+            )
+            {
+                $lineType = 'Section Title'
+            }
+
+            if
+            (
+                $line -and
+                $line -match $Delimiter -and
+                $line.Split($Delimiter)[0] -eq 'Name'
+            )
+            {
+                $lineType = 'Name'
+            }
+            if
+            (
+                $line -and
+                $line -match $Delimiter -and
+                $line.Split($Delimiter)[0] -eq 'Version'
+            )
+            {
+                $lineType = 'Version Number'
+            }
+
+            if ($i -eq 0)
+            {
+                $lineType = 'Report Title'
+            }
+
+            # report a stray Version
+            if
+            (
+                $lineType -eq 'Version Number' -and
+                -not $currentName
+            )
+            {
+                $versionNumber = $line.Split($Delimiter)[1]
+                Write-Warning "Version Number $versionNumber found without a name."
+                $currentSection.StrayVersions.Add($versionNumber)
+            }
+
+            # finish a Name/Version pair
+            if
+            (
+                $currentName -and
+                $lineType -eq 'Version Number'
+            )
+            {
+                $currentSection.Versions.$currentName = $line.Split($Delimiter)[1]
+            }
+
+            # finish the section
+            if
+            (
+                $lineType -eq 'Section Title' -and
+                $sectionIndex
+            )
+            {
+                $currentSection.EndIndex = $i-1
+                $h.Sections.$currentSectionName = $currentSection
+            }
+
+            # start the section
+            if ($lineType -eq 'Section Title')
+            {
+                $sectionIndex++
+                $currentName = $null
+                $currentSection = @{}
+                $currentSection.Versions = @{}
+                $currentSection.StrayVersions = [System.Collections.ArrayList]@()
+                $currentSection.CellLines = [System.Collections.ArrayList]@()
+                $currentSectionName = $line
+                $currentSection.StartIndex = $i
+            }
+
+            # start a Name/Version pair
+            if ($lineType -eq 'Name')
+            {
+                $currentName = $line.Split($Delimiter)[1]
+                $currentSection.Versions.$currentName = $null
+            }
+
+            # finish the last section
+            if ( $i -eq ($accumulator.Count-1) )
+            {
+                $currentSection.EndIndex = $i
+                $h.Sections.$currentSectionName = $currentSection
+            }
+
+            $i++
+        }
+
+        foreach ($sectionName in $h.Sections.Keys)
+        {
+            foreach ($versionName in $h.Sections.$sectionName.Versions.Keys)
+            {
+                if ($null -eq $h.Sections.$sectionName.Versions.$versionName)
+                {
+                    Write-Warning "Section $sectionName has name $versionName but no corresponding version."
+                }
+            }
+        }
+
+        return $h
+    }
+}
