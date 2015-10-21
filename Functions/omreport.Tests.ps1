@@ -94,4 +94,94 @@ Describe ConvertFrom-OmreportStream {
         $r[1].b | Should be 4
     }
 }
+Describe ConvertFrom-OmreportSystemVersion {
+    It 'has incorrect title.' {
+        $s = 'wrong title'
+
+        { ConvertFrom-OmreportSystemVersion $s } |
+            Should throw 'OmreportStream does not begin with "Version Report".'
+    }
+    It 'extracts correct first section.' {
+        $s = @(
+            'Version Report'
+            'title'
+            'Name;a'
+            'Version;1'
+            'second title'
+        )
+        $r = ConvertFrom-OmreportSystemVersion $s
+
+        $r.Sections.Count | Should be 2
+        $r.Sections.Keys -contains 'title' | Should be $true
+        $r.Sections.title.StartIndex | Should be 1
+        $r.Sections.title.EndIndex | Should be 3
+        $r.Sections.title.Versions.Count | Should be 1
+        $r.Sections.title.Versions.Keys -contains 'a' | Should be $true
+        $r.Sections.title.Versions.a | should be '1'
+    }
+    It 'extracts correct last section.' {
+        $s = @(
+            'Version Report'
+            'title'
+            ';'
+            ';'
+            'title2'
+            'Name;b'
+            'Version;2'
+        )
+        $r = ConvertFrom-OmreportSystemVersion $s
+
+        $r.Sections.Count | Should be 2
+        $r.Sections.Keys -contains 'title2' | Should be $true
+        $r.Sections.title2.StartIndex | Should be 4
+        $r.Sections.title2.EndIndex | Should be 6
+        $r.Sections.title2.Versions.Count | Should be 1
+        $r.Sections.title2.Versions.Keys -contains 'b' | Should be $true
+        $r.Sections.title2.Versions.b | Should be '2'
+    }
+    It 'extracts multiple versions.' {
+        $s = @(
+            'Version Report'
+            'title'
+            'Name;a'
+            'Version;1'
+            'Name;b'
+            'Version;2'
+        )
+        $r = ConvertFrom-OmreportSystemVersion $s
+
+        $r.Sections.title.Versions.a | Should be '1'
+        $r.Sections.title.Versions.b | Should be '2'
+    }
+    Context 'missing version.' {
+        Mock Write-Warning -Verifiable
+        It 'warns when name is provided without version.' {
+            $s = @(
+                'Version Report'
+                'title'
+                'Name;a'
+            )
+            $r = ConvertFrom-OmreportSystemVersion $s
+
+            Assert-MockCalled Write-Warning -Times 1 {
+                $Message -eq 'Section title has name a but no corresponding version.'
+            }
+        }
+    }
+    Context 'missing name.' {
+        Mock Write-Warning -Verifiable
+        It 'warns when version is provided without name.' {
+            $s = @(
+                'Version Report'
+                'title'
+                'Version;1'
+            )
+            $r = ConvertFrom-OmreportSystemVersion $s
+
+            Assert-MockCalled Write-Warning -Times 1 {
+                $Message -eq 'Version Number 1 found without a name.'
+            }
+        }
+    }
+}
 }
