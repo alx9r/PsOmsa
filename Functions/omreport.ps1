@@ -31,7 +31,6 @@ The code above outputs the physical ID and capacity of hard drives that are dedi
 
 #>
     [CmdletBinding()]
-    [OutputType([pscustomobject])]
     param
     (
         # The stream object output by omreport when invoked from PowerShell.
@@ -113,7 +112,7 @@ The code above outputs the physical ID and capacity of hard drives that are dedi
             }
 
             $objects.Add(
-                [pscustomobject]$thisHash
+                (New-Object psobject -Property $thisHash)
             ) | Out-Null
         }
 
@@ -121,15 +120,14 @@ The code above outputs the physical ID and capacity of hard drives that are dedi
 
         if ( $ParentData )
         {
-            return [pscustomobject]$h
+            return New-Object psobject -Property $h
         }
-        return ,[pscustomobject]$h.Objects
+        return ,$h.Objects
     }
 }
 function ConvertFrom-OmreportSystemVersion
 {
     [CmdletBinding()]
-    [OutputType([pscustomobject])]
     param
     (
         # The stream object output by omreport when invoked from PowerShell.

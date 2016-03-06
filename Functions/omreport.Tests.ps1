@@ -26,10 +26,11 @@ Describe ConvertFrom-OmreportStream {
         $r = ConvertFrom-OmreportStream $s -ParentData
 
         $r.Objects.Count | Should be 1
-        $r.Objects.a | Should be 1
-        $r.Objects.b | Should be 2
-        $r.Objects.Keys -notcontains 'c' | Should be $true
-        $r.Objects.c | Should beNullOrEmpty
+        $r.Objects[0].a | Should be 1
+        $r.Objects[0].b | Should be 2
+        $r.Objects[0] | Get-Member | ? {$_.Name -eq 'c'} |
+            Should not BeNullOrEmpty
+        $r.Objects[0].c | Should beNullOrEmpty
     }
     It 'correct UndelimitedLines' {
         $s = @(
