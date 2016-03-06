@@ -98,9 +98,9 @@ The code above outputs the physical ID and capacity of hard drives that are dedi
         {
             $properties = $line.Split($delimiter)
 
-            if ( $h.Headings.Count -ne $properties.Count )
+            if ( $h.Headings.Count -lt $properties.Count )
             {
-                Write-Warning "Number of columns in line differ from number of columns in header. Omitting line: $line"
+                Write-Warning "Number of columns in higher than number of columns in header. Omitting line: $line"
                 continue
             }
 

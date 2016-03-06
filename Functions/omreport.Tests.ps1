@@ -10,13 +10,26 @@ Describe ConvertFrom-OmreportStream {
         { ConvertFrom-OmreportStream ';',';' } |
             Should Throw 'OmreportStream contains blank headings.'
     }
-    Context 'column count mismatch' {
+    Context 'too many columns' {
         Mock Write-Warning -Verifiable
         ConvertFrom-OmreportStream 'a;b','1;2;3'
 
         Assert-MockCalled Write-Warning -Times 1 {
-            $Message -eq 'Number of columns in line differ from number of columns in header. Omitting line: 1;2;3'
+            $Message -eq 'Number of columns in higher than number of columns in header. Omitting line: 1;2;3'
         }
+    }
+    It 'no properties for missing columns at end of line' {
+        $s = @(
+            'a;b;c'
+            '1;2'
+        )
+        $r = ConvertFrom-OmreportStream $s -ParentData
+
+        $r.Objects.Count | Should be 1
+        $r.Objects.a | Should be 1
+        $r.Objects.b | Should be 2
+        $r.Objects.Keys -notcontains 'c' | Should be $true
+        $r.Objects.c | Should beNullOrEmpty
     }
     It 'correct UndelimitedLines' {
         $s = @(
