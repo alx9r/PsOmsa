@@ -67,6 +67,25 @@ Describe ConvertFrom-OmreportStream {
         $r.Objects[1].a | Should be 3
         $r.Objects[1].b | Should be 4
     }
+    It 'returns an array.' {
+        $s = @(
+            'a;b'
+            '1;2'
+            '3;4'
+        )
+        $r = ConvertFrom-OmreportStream $s
+
+        $r -is [array] | Should be $true
+    }
+    It 'returns an array for a single entry.' {
+        $s = @(
+            'a;b'
+            '1;2'
+        )
+        $r = ConvertFrom-OmreportStream $s
+
+        $r -is [array] | Should be $true
+    }
     It 'accepts pipeline input' {
         $r = @(
             'a;b'
