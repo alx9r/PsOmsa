@@ -117,13 +117,13 @@ The code above outputs the physical ID and capacity of hard drives that are dedi
             ) | Out-Null
         }
 
-        $h.Objects = $objects
+        $h.Objects = [array]$objects
 
         if ( $ParentData )
         {
             return [pscustomobject]$h
         }
-        return [pscustomobject]$h.Objects
+        return ,[pscustomobject]$h.Objects
     }
 }
 function ConvertFrom-OmreportSystemVersion
