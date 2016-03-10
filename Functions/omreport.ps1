@@ -280,6 +280,6 @@ function ConvertFrom-OmreportSystemVersion
             }
         }
 
-        return $h
+        return New-Object psobject -Property $h
     }
 }

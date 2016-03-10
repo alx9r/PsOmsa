@@ -134,6 +134,33 @@ Describe ConvertFrom-OmreportSystemVersion {
         { ConvertFrom-OmreportSystemVersion $s } |
             Should throw 'OmreportStream does not begin with "Version Report".'
     }
+    It 'extracts correct title.' {
+        $s = @(
+            'Version Report'
+            'title'
+            'Name;a'
+            'Version;1'
+            'second title'
+        )
+
+        $r = ConvertFrom-OmreportSystemVersion $s
+
+        $r.Title | Should be 'Version Report'
+    }
+    It 'produces an object not a hashtable' {
+        $s = @(
+            'Version Report'
+            'title'
+            'Name;a'
+            'Version;1'
+            'second title'
+        )
+
+        $r = ConvertFrom-OmreportSystemVersion $s
+
+        $r -is [psobject] | Should be $true
+        $r -is [hashtable] | Should be $false
+    }
     It 'extracts correct first section.' {
         $s = @(
             'Version Report'
