@@ -236,7 +236,11 @@ function ConvertFrom-OmreportSystemVersion
             )
             {
                 $currentSection.EndIndex = $i-1
-                $h.Sections.$currentSectionName = $currentSection
+                if ($currentSection.Versions.Count)
+                {
+                    $currentSection.Versions = New-Object psobject -Property $currentSection.Versions
+                }
+                $h.Sections.$currentSectionName = New-Object psobject -Property $currentSection
             }
 
             # start the section
@@ -263,7 +267,11 @@ function ConvertFrom-OmreportSystemVersion
             if ( $i -eq ($accumulator.Count-1) )
             {
                 $currentSection.EndIndex = $i
-                $h.Sections.$currentSectionName = $currentSection
+                if ($currentSection.Versions.Count)
+                {
+                    $currentSection.Versions = New-Object psobject -Property $currentSection.Versions
+                }
+                $h.Sections.$currentSectionName = New-Object psobject -Property $currentSection
             }
 
             $i++
@@ -271,7 +279,7 @@ function ConvertFrom-OmreportSystemVersion
 
         foreach ($sectionName in $h.Sections.Keys)
         {
-            foreach ($versionName in $h.Sections.$sectionName.Versions.Keys)
+            foreach ($versionName in ($h.Sections.$sectionName.Versions | gm -MemberType NoteProperty | % {$_.Name}))
             {
                 if ($null -eq $h.Sections.$sectionName.Versions.$versionName)
                 {
@@ -279,6 +287,8 @@ function ConvertFrom-OmreportSystemVersion
                 }
             }
         }
+
+        $h.Sections = New-Object psobject -Property $h.Sections
 
         return New-Object psobject -Property $h
     }

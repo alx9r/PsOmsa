@@ -147,19 +147,32 @@ Describe ConvertFrom-OmreportSystemVersion {
 
         $r.Title | Should be 'Version Report'
     }
-    It 'produces an object not a hashtable' {
+    It 'produces objects not hashtables' {
         $s = @(
             'Version Report'
             'title'
             'Name;a'
             'Version;1'
-            'second title'
+            'title2'
+            'Name;b'
+            'Version;2'
         )
 
         $r = ConvertFrom-OmreportSystemVersion $s
 
         $r -is [psobject] | Should be $true
         $r -is [hashtable] | Should be $false
+        $r.Sections -is [psobject] | Should be $true
+        $r.Sections -is [hashtable] | Should be $false
+        $r.Sections.title -is [psobject] | Should be $true
+        $r.Sections.title -is [hashtable] | Should be $false
+        $r.Sections.title2 -is [psobject] | Should be $true
+        $r.Sections.title2 -is [hashtable] | Should be $false
+        $r.Sections.title.Versions -is [psobject] | Should be $true
+        $r.Sections.title.Versions -is [hashtable] | Should be $false
+        $r.Sections.title2.Versions -is [psobject] | Should be $true
+        $r.Sections.title2.Versions -is [hashtable] | Should be $false
+
     }
     It 'extracts correct first section.' {
         $s = @(
@@ -171,12 +184,15 @@ Describe ConvertFrom-OmreportSystemVersion {
         )
         $r = ConvertFrom-OmreportSystemVersion $s
 
-        $r.Sections.Count | Should be 2
-        $r.Sections.Keys -contains 'title' | Should be $true
+        $sections = $r.Sections | Get-Member -MemberType NoteProperty
+        $sections.Count | Should be 2
+        ($sections | %{$_.Name}) -contains 'title' | Should be $true
+        ($sections | %{$_.Name}) -contains 'second title' | Should be $true
         $r.Sections.title.StartIndex | Should be 1
         $r.Sections.title.EndIndex | Should be 3
-        $r.Sections.title.Versions.Count | Should be 1
-        $r.Sections.title.Versions.Keys -contains 'a' | Should be $true
+        $versions = $r.Sections.title.Versions | Get-Member -MemberType NoteProperty
+        $versions | Measure | %{$_.Count} | Should be 1
+        $versions.Name | Should be 'a'
         $r.Sections.title.Versions.a | should be '1'
     }
     It 'extracts correct last section.' {
@@ -191,13 +207,31 @@ Describe ConvertFrom-OmreportSystemVersion {
         )
         $r = ConvertFrom-OmreportSystemVersion $s
 
-        $r.Sections.Count | Should be 2
-        $r.Sections.Keys -contains 'title2' | Should be $true
+        $sections = $r.Sections | Get-Member -MemberType NoteProperty
+        $sections.Count | Should be 2
+        $sections[0].Name | Should be 'title'
+        $sections[1].Name | Should be 'title2'
         $r.Sections.title2.StartIndex | Should be 4
         $r.Sections.title2.EndIndex | Should be 6
-        $r.Sections.title2.Versions.Count | Should be 1
-        $r.Sections.title2.Versions.Keys -contains 'b' | Should be $true
+        $versions = $r.Sections.title2.Versions | Get-Member -MemberType NoteProperty
+        $versions | Measure | %{$_.Count} | Should be 1
+        $versions.Name | Should be 'b'
         $r.Sections.title2.Versions.b | Should be '2'
+    }
+    It 'extracts multiple sections' {
+        $s = @(
+            'Version Report'
+            'title'
+            'Name;a'
+            'Version;1'
+            'title2'
+            'Name;b'
+            'Version;2'
+        )
+        $r = ConvertFrom-OmreportSystemVersion $s
+
+        $r.Sections.title.Versions.a | Should be 1
+        $r.Sections.title2.Versions.b | Should be 2
     }
     It 'extracts multiple versions.' {
         $s = @(
