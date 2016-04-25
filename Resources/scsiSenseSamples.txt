@@ -1,0 +1,2 @@
+Unexpected sense. SCSI sense data: Sense key:  3 Sense code: 11 Sense qualifier:  0:  Physical Disk 0:1:2 Controller 0, Connector 0
+Unexpected sense. SCSI sense data: Sense key:  3 Sense code: 11 Sense qualifier:  0:  Physical Disk 0:1:1 Controller 0, Connector 0
