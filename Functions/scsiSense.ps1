@@ -34,6 +34,16 @@ function ConvertFrom-OmScsiSenseDescription
     {
         $regex = [regex]$scsiSensePattern
         $match = $regex.Match($DescriptionString)
-        $match | ConvertFrom-RegexNamedGroupCapture -Regex $regex
+
+        $h = @{}
+        foreach ($name in $regex.GetGroupNames())
+        {
+            if ($name -eq 0)
+            {
+                continue
+            }
+            $h.$name = $match.Groups[$name].Value
+        }
+        return $h
     }
 }
