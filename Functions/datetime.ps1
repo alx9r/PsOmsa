@@ -1,5 +1,5 @@
 
-$pattern = '^(?<DayOfWeek>(Sun|Mon|Tue|Wed|Thu|Fri|Sat)) (?<Month>(Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)) (?<Day>[0-9]{2}) (?<Hour>[0-9]{2}):(?<Minute>[0-9]{2}):(?<Second>[0-9]{2}) (?<Year>[0-9]{4})'
+$datePattern = '^(?<DayOfWeek>(Sun|Mon|Tue|Wed|Thu|Fri|Sat)) (?<Month>(Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)) (?<Day>[0-9]{2}) (?<Hour>[0-9]{2}):(?<Minute>[0-9]{2}):(?<Second>[0-9]{2}) (?<Year>[0-9]{4})'
 function Test-OmDateTime
 {
     [CmdletBinding()]
@@ -14,7 +14,7 @@ function Test-OmDateTime
     )
     process
     {
-        $DateString -match $pattern
+        $DateString -match $datePattern
     }
 }
 function ConvertFrom-OmDateTime
@@ -32,7 +32,7 @@ function ConvertFrom-OmDateTime
     )
     process
     {
-        $groups = ([regex]$pattern).Match($DateString).Groups
+        $groups = ([regex]$datePattern).Match($DateString).Groups
         $splat = @{
             Month = @{
                 Jan = 1; Feb = 2; Mar = 3; Apr = 4; May = 5; Jun = 6;
